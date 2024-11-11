@@ -1,26 +1,33 @@
 // repositories/mission.controller.js
-import { pool } from '../config/db.js';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 class MissionRepository {
     async isMissionOngoing(storeId, missionId) {
-        const [rows] = await pool.query(
-            'SELECT * FROM store_missions WHERE store_id = ? AND mission_id = ?',
-            [storeId, missionId]
-        );
-        return rows.length > 0;
+        const mission = await prisma.mission.findFirst({
+            where: {
+                storeId: storeId,
+                id: missionId,
+                status: "ongoing"
+            }
+        });
+        return mission !== null;
     }
 
     async addMission(storeId, missionId) {
-        const [result] = await pool.query(
-            'INSERT INTO store_missions (store_id, mission_id, status) VALUES (?, ?, "ongoing")',
-            [storeId, missionId]
-        );
+        const mission = await prisma.mission.create({
+            data: {
+                storeId: storeId,
+                status: "ongoing",
+            }
+        });
         
-        if (result.affectedRows > 0) {
+        if (mission) {
             return {
                 success: true,
                 message: '미션이 성공적으로 추가되었습니다.',
-                missionId: result.insertId // 새로 추가된 mission의 ID
+                missionId: mission.id
             };
         } else {
             throw new Error("미션 추가 실패.");
@@ -28,4 +35,4 @@ class MissionRepository {
     }
 }
 
-export default new MissionRepository(); // Export instance of MissionRepository
+export default new MissionRepository();

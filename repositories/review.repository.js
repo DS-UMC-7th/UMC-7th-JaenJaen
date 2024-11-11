@@ -1,27 +1,33 @@
 // repositories/review.controller.js
 
-import { pool } from '../config/db.js';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 class ReviewRepository {
     async isStoreExists(storeId) {
-        const [rows] = await pool.query(
-            'SELECT * FROM stores WHERE id = ?',
-            [storeId]
-        );
-        return rows.length > 0;
+        const store = await prisma.store.findUnique({
+            where: {
+                id: storeId
+            }
+        });
+        return store !== null;
     }
 
     async addReview(storeId, content, rating) {
-        const [result] = await pool.query(
-            'INSERT INTO reviews (store_id, content, rating) VALUES (?, ?, ?)',
-            [storeId, content, rating]
-        );
+        const review = await prisma.review.create({
+            data: {
+                storeId: storeId,
+                content: content,
+                rating: rating
+            }
+        });
         
-        if (result.affectedRows > 0) {
+        if (review) {
             return {
                 success: true,
                 message: '리뷰가 성공적으로 추가되었습니다.',
-                reviewId: result.insertId // 새로 추가된 리뷰의 ID
+                reviewId: review.id
             };
         } else {
             throw new Error("리뷰 추가 실패.");
@@ -29,4 +35,4 @@ class ReviewRepository {
     }
 }
 
-export default new ReviewRepository(); // Export instance of ReviewRepository
+export default new ReviewRepository();

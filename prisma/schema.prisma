@@ -1,0 +1,50 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+
+model Mission {
+  id          Int      @id @default(autoincrement())
+  title       String   @db.VarChar(255)
+  description String?
+
+  StoreMission StoreMission[] // 관계 설정
+}
+
+model Store {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(255)
+  address     String?  @db.VarChar(255)
+
+  StoreMission StoreMission[] // 관계 설정
+  reviews      Review[]
+}
+
+model StoreMission {
+  id        Int    @id @default(autoincrement())
+  storeId   Int
+  missionId Int
+  status    String @default("ongoing") @db.VarChar(50)
+
+  store     Store   @relation(fields: [storeId], references: [id])
+  mission   Mission @relation(fields: [missionId], references: [id])
+
+  @@unique([storeId, missionId]) // UNIQUE 제약조건 설정
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  storeId   Int
+  content   String
+  rating    Int     
+  createdAt DateTime @default(now())
+
+  store     Store    @relation(fields: [storeId], references: [id])
+}
