@@ -1,6 +1,7 @@
 // controllers/review.controller.js
 import ReviewService from '../services/review.service.js';
 import { ReviewRequestDTO } from '../dtos/review.dto.js';
+import CustomError from '../config/error.js';
 
 class ReviewController {
     async addReview(req, res) {
@@ -9,17 +10,24 @@ class ReviewController {
 
         try {
             const result = await ReviewService.addReview(reviewRequest.storeId, reviewRequest.content, reviewRequest.rating);
-            // 성공 메시지와 함께 클라이언트로 결과 반환
-            res.status(200).json(result);
-        } catch (error) {
-            // 실패 메시지
-            res.status(400).json({
-                success: false,
-                message: error.message
+            res.status(200).json({
+                isSuccess: true,
+                code: 200,
+                message: '리뷰가 성공적으로 추가되었습니다.',
+                data: result
             });
+        } catch (error) {
+            if (error instanceof CustomError) {
+                res.status(error.statusCode).json(error.getErrorResponse());
+            } else {
+                res.status(500).json({
+                    isSuccess: false,
+                    code: 'SERVER_ERROR',
+                    message: '서버 오류가 발생했습니다.'
+                });
+            }
         }
     }
 }
 
-export default new ReviewController(); // Use default export
-
+export default new ReviewController();

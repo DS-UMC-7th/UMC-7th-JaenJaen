@@ -1,15 +1,16 @@
-// repositories/mission.controller.js
+// services/mission.service.js
 
 import MissionRepository from '../repositories/mission.repository.js';
+import CustomError from '../config/error.js';
 
 class MissionService {
     async startMission(storeId, missionId) {
         const isOngoing = await MissionRepository.isMissionOngoing(storeId, missionId);
         if (isOngoing) {
-            throw new Error("이미 도전 중인 미션입니다.");
+            throw new CustomError(400, '이미 도전 중인 미션입니다.', 'MISSION_ALREADY_ONGOING');
         }
         return await MissionRepository.addMission(storeId, missionId);
     }
 }
 
-export default new MissionService(); // Export instance of MissionService
+export default new MissionService();

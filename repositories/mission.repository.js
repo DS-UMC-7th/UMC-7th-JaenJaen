@@ -1,5 +1,6 @@
-// repositories/mission.controller.js
+// repositories/mission.repository.js
 import { pool } from '../config/db.js';
+import CustomError from '../config/error.js';
 
 class MissionRepository {
     async isMissionOngoing(storeId, missionId) {
@@ -20,12 +21,12 @@ class MissionRepository {
             return {
                 success: true,
                 message: '미션이 성공적으로 추가되었습니다.',
-                missionId: result.insertId // 새로 추가된 mission의 ID
+                missionId: result.insertId
             };
         } else {
-            throw new Error("미션 추가 실패.");
+            throw new CustomError(500, '미션 추가 실패.', 'MISSION_CREATION_FAILED');
         }
     }
 }
 
-export default new MissionRepository(); // Export instance of MissionRepository
+export default new MissionRepository();

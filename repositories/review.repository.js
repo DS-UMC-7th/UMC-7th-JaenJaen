@@ -1,6 +1,7 @@
 // repositories/review.controller.js
 
 import { pool } from '../config/db.js';
+import CustomError from '../config/error.js';
 
 class ReviewRepository {
     async isStoreExists(storeId) {
@@ -21,12 +22,12 @@ class ReviewRepository {
             return {
                 success: true,
                 message: '리뷰가 성공적으로 추가되었습니다.',
-                reviewId: result.insertId // 새로 추가된 리뷰의 ID
+                reviewId: result.insertId
             };
         } else {
-            throw new Error("리뷰 추가 실패.");
+            throw new CustomError(500, '리뷰 추가 실패.', 'REVIEW_CREATION_FAILED');
         }
     }
 }
 
-export default new ReviewRepository(); // Export instance of ReviewRepository
+export default new ReviewRepository();
